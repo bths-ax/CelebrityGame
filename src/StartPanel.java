@@ -174,6 +174,7 @@ public class StartPanel extends JPanel implements ActionListener {
 	 */
 	private void setupListeners() {
 		addCelebrityButton.addActionListener(this);
+		startButton.addActionListener(this);
 	}
 
 
@@ -193,10 +194,7 @@ public class StartPanel extends JPanel implements ActionListener {
 		boolean validClue = false;
 		boolean validAnswer = false;
 		validClue = controller.validateClue(clueText, "");
-
-		if (answerText.length() > 4) {
-			validAnswer = controller.validateCelebrity(answerText);
-		}
+		validAnswer = controller.validateCelebrity(answerText);
 
 		return (validClue && validAnswer);
 	}
@@ -219,6 +217,11 @@ public class StartPanel extends JPanel implements ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
+		if (((JButton)e.getSource()).getText().equals("Start Celebrity game")) {
+			controller.play();
+			return;
+		}
+		
 		// when "add celebrity" button gets clicked:
 		answerField.setBackground(Color.WHITE);
 		clueField.setBackground(Color.WHITE);

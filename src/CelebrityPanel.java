@@ -10,7 +10,7 @@ import java.awt.event.ActionEvent;
  * @author cody.henrichsen
  * @version 2.9 18/09/2018 Adjusted the listener functionality.
  */
-public class CelebrityPanel extends JPanel {
+public class CelebrityPanel extends JPanel implements ActionListener {
 
 	/**
 	 * The button pressed when making a guess.
@@ -97,6 +97,23 @@ public class CelebrityPanel extends JPanel {
 	 */
 	public CelebrityPanel(CelebrityGame controllerRef) {
 		super();
+		this.controller = controllerRef;
+		this.panelLayout = new SpringLayout();
+		this.guessLabel = new JLabel("Guess:");
+		this.staticTimerLabel = new JLabel("Time remaining: ");
+		this.dynamicTimerLabel = new JLabel("60");
+		this.guessButton = new JButton("Submit guess");
+		this.resetButton = new JButton("Start again");
+		this.clueArea = new JTextArea("", 30, 20);
+		this.cluePane = new JScrollPane(clueArea);
+		this.guessField = new JTextField("Enter guess here", 30);
+		this.success = "You guessed correctly!!! \nNext Celebrity clue is: ";
+		this.tryAgain = "You have chosen poorly, try again!\nThe clue is: ";
+		this.seconds = 60;
+
+		setupPanel();
+		setupLayout();
+		setupListeners();
 	}
 
 	/**
@@ -104,7 +121,29 @@ public class CelebrityPanel extends JPanel {
 	 * including scroll bars, and line wrap.
 	 */
 	private void setupPanel() {
+		setLayout(panelLayout);
+		add(guessLabel);
+		add(cluePane);
+		add(guessField);
+		add(guessButton);
+		add(resetButton);
+		add(dynamicTimerLabel);
+		add(staticTimerLabel);
 
+		//Changes the font to be larger than default
+		staticTimerLabel.setFont(new Font("Helvetica", Font.BOLD,20));
+		dynamicTimerLabel.setFont(new Font("Helvetica", Font.BOLD,20));
+
+		// These lines allow vertical scrolling but not horizontal.
+		cluePane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		cluePane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+		// These lines allow word and line wrapping for the clue area.
+		clueArea.setWrapStyleWord(true);
+		clueArea.setLineWrap(true);
+
+		// The clue area is set to not be editable by the user :D
+		clueArea.setEditable(false);
 	}
 
 	/**
@@ -137,7 +176,7 @@ public class CelebrityPanel extends JPanel {
 	 * Attaches listeners to the GUI components of the program
 	 */
 	private void setupListeners() {
-
+		guessButton.addActionListener(this);
 	}
 
 	/**
@@ -156,7 +195,7 @@ public class CelebrityPanel extends JPanel {
 	 *            The clue to add to the screen.
 	 */
 	public void addClue(String clue) {
-
+		clueArea.setText("The clue is: " + clue);
 	}
 
 	/**
@@ -164,6 +203,29 @@ public class CelebrityPanel extends JPanel {
 	 * to provide the same functionality.
 	 */
 	private void updateScreen() {
+		String guess = guessField.getText();
+		clueArea.append("\nYou guessed: " + guess + "\n");
+		if (controller.processGuess(guess)) {
+			clueArea.setBackground(Color.CYAN);
+			clueArea.append(success);
+			if (controller.getCelebrityGameSize() <= 0) {
+				clueArea.append("\nNo more celebrities to guess");
+				guessField.setEnabled(false);
+				guessButton.setEnabled(false);
+			} else {
+				clueArea.append(controller.sendClue());
+			}
+		} else {
+			clueArea.setBackground(Color.WHITE);
+			clueArea.append(tryAgain + controller.sendClue());
+		}
+	}
 
+	public void actionPerformed(ActionEvent e) {
+		JButton button = (JButton)e.getSource();
+
+		if (button.getText().equals("Submit guess")) {
+			updateScreen();
+		}
 	}
 }
